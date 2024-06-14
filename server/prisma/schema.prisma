@@ -1,0 +1,183 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model address {
+  address_id      Int        @id @default(autoincrement())
+  address         String?    @db.VarChar(255)
+  city            String?    @db.VarChar(50)
+  company         String?    @db.VarChar(50)
+  country         String?    @db.VarChar(50)
+  first_name      String?    @db.VarChar(30)
+  last_name       String?    @db.VarChar(30)
+  phone           String?    @db.VarChar(13)
+  province        String?    @db.VarChar(30)
+  zip             String?    @db.VarChar(30)
+  name            String?    @db.VarChar(30)
+  province_code   String?    @db.VarChar(30)
+  country_code    String?    @db.VarChar(30)
+  address_default Boolean?
+  district        String?    @db.VarChar(30)
+  district_code   String?    @db.VarChar(30)
+  ward            String?    @db.VarChar(30)
+  ward_code       String?    @db.VarChar(30)
+  cus_id          Int?
+  customers       customers? @relation(fields: [cus_id], references: [cus_id], onDelete: NoAction, onUpdate: NoAction, map: "address_ibfk_1")
+
+  @@index([cus_id], map: "address")
+}
+
+model collections {
+  id             Int       @id @default(autoincrement())
+  body_html      String?   @db.Text
+  img_collection String?   @db.VarChar(255)
+  publisted      Boolean?
+  sort_order     String?   @db.VarChar(50)
+  title          String?   @db.VarChar(100)
+  create_at      DateTime? @default(now()) @db.Timestamp(0)
+  published_at   DateTime? @db.Timestamp(0)
+  update_at      DateTime? @default(now()) @db.Timestamp(0)
+}
+
+model customers {
+  cus_id                Int               @id @default(autoincrement())
+  first_name            String?           @db.VarChar(30)
+  last_name             String?           @db.VarChar(30)
+  email                 String?           @unique(map: "email") @db.VarChar(255)
+  phone                 String?           @unique(map: "phone") @db.VarChar(13)
+  verified_email        Boolean?
+  password              String?           @db.VarChar(20)
+  password_confirmation String?           @db.VarChar(20)
+  send_email_welcome    Boolean?
+  last_order_id         Int?
+  last_order_name       Int?
+  orders_count          Int?
+  birthday              DateTime?         @db.Date
+  gender                customers_gender?
+  total_spent           Decimal?          @db.Decimal(10, 2)
+  total_paid            Decimal?          @db.Decimal(10, 2)
+  group_name            String?           @db.VarChar(30)
+  accepts_marketing     Boolean?
+  created_at            DateTime?         @default(now()) @db.Timestamp(0)
+  updated_at            DateTime?         @default(now()) @db.Timestamp(0)
+  address               address[]
+}
+
+model district {
+  id          Int       @id
+  name        String?   @db.VarChar(30)
+  code        String?   @db.VarChar(30)
+  province_id Int?
+  province    province? @relation(fields: [province_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "district_ibfk_1")
+  ward        ward[]
+
+  @@index([province_id], map: "district")
+}
+
+model images {
+  id          Int           @id @default(autoincrement())
+  position    Int?
+  src         String?       @db.VarChar(255)
+  filename    String?       @db.VarChar(255)
+  product_id  Int?
+  create_at   DateTime?     @default(now()) @db.Timestamp(0)
+  update_at   DateTime?     @default(now()) @db.Timestamp(0)
+  products    products?     @relation(fields: [product_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "images_ibfk_1")
+  img_variant img_variant[]
+
+  @@index([product_id], map: "product_id")
+}
+
+model img_variant {
+  id         Int       @id @default(autoincrement())
+  img_id     Int?
+  variant_id Int?
+  images     images?   @relation(fields: [img_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "img_variant_ibfk_1")
+  variants   variants? @relation(fields: [variant_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "img_variant_ibfk_2")
+
+  @@index([img_id], map: "img_id")
+  @@index([variant_id], map: "variant_id")
+}
+
+model products {
+  id              Int       @id @default(autoincrement())
+  body_html       String?   @db.Text
+  handle          String?   @db.VarChar(150)
+  product_type    String?   @db.VarChar(50)
+  tags            String?   @db.VarChar(50)
+  published_scope Boolean?
+  vendor          String?   @db.VarChar(50)
+  available       Boolean?
+  is_delete       Boolean?
+  published_at    DateTime? @default(now()) @db.Timestamp(0)
+  create_at       DateTime? @default(now()) @db.Timestamp(0)
+  update_at       DateTime? @default(now()) @db.Timestamp(0)
+  images          images[]
+}
+
+model province {
+  id       Int        @id
+  code     String?    @db.VarChar(30)
+  name     String?    @db.VarChar(30)
+  district district[]
+}
+
+model user_permissions {
+  permissions_id  Int      @id @default(autoincrement())
+  view_product    Boolean?
+  edit_product    Boolean?
+  view_collection Boolean?
+  edit_collection Boolean?
+  users           users[]
+}
+
+model users {
+  id               Int               @id @default(autoincrement())
+  first_name       String?           @db.VarChar(30)
+  last_name        String?           @db.VarChar(30)
+  email            String?           @db.VarChar(255)
+  password         String?           @db.VarChar(20)
+  create_at        DateTime?         @default(now()) @db.Timestamp(0)
+  create_update    DateTime?         @default(now()) @db.Timestamp(0)
+  permissions_id   Int?
+  user_permissions user_permissions? @relation(fields: [permissions_id], references: [permissions_id], onDelete: NoAction, onUpdate: NoAction, map: "users_ibfk_1")
+
+  @@index([permissions_id], map: "users")
+}
+
+model variants {
+  id               Int           @id @default(autoincrement())
+  barcode          String?       @db.VarChar(100)
+  compare_at_price Decimal?      @db.Decimal(10, 2)
+  available        Boolean?
+  price            Decimal?      @db.Decimal(10, 2)
+  sku              String?       @db.VarChar(30)
+  title            String?       @db.VarChar(255)
+  option1          String?       @db.VarChar(10)
+  option2          String?       @db.VarChar(10)
+  option3          String?       @db.VarChar(20)
+  create_at        DateTime?     @default(now()) @db.Timestamp(0)
+  update_at        DateTime?     @default(now()) @db.Timestamp(0)
+  img_variant      img_variant[]
+}
+
+model ward {
+  id          Int       @id
+  name        String?   @db.VarChar(30)
+  code        String?   @db.VarChar(30)
+  district_id Int?
+  district    district? @relation(fields: [district_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "ward_ibfk_1")
+
+  @@index([district_id], map: "ward")
+}
+
+enum customers_gender {
+  Male
+  Female
+  Other
+}
