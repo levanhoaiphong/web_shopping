@@ -15,7 +15,6 @@ export class UploadMiddleware implements NestMiddleware {
                 cb(null, `./public/${this.options.destination}`);
             },
             filename: (req, files, cb) => {
-                console.log("🚀 ~ UploadMiddleware ~ use ~ file:", files);
                 const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
                 cb(null, files.fieldname + '-' + uniqueSuffix + extname(files.originalname));
             },
